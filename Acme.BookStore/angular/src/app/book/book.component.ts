@@ -12,6 +12,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms'; // add this
 })
 export class BookComponent implements OnInit {
   book = { items: [], totalCount: 0 } as PagedResultDto<BookDto>;
+  selectedBook = {} as BookDto; // declare selectedBook
   form: FormGroup; // add this line
 
   // add bookTypes as a list of BookType enum members
@@ -33,10 +34,18 @@ export class BookComponent implements OnInit {
     });
   }
   createBook() {
+    this.selectedBook = {} as BookDto; // reset the selected book
     this.buildForm(); // add this line
     this.isModalOpen = true;
   }
-  
+   // Add editBook method
+   editBook(id: string) {
+    this.bookService.get(id).subscribe((book) => {
+      this.selectedBook = book;
+      this.buildForm();
+      this.isModalOpen = true;
+    });
+  }
   // add buildForm method
   buildForm() {
     this.form = this.fb.group({
@@ -47,13 +56,17 @@ export class BookComponent implements OnInit {
     });
   }
 
-  // add save method
+  // change the save method
   save() {
     if (this.form.invalid) {
       return;
     }
 
-    this.bookService.create(this.form.value).subscribe(() => {
+    const request = this.selectedBook.id
+      ? this.bookService.update(this.selectedBook.id, this.form.value)
+      : this.bookService.create(this.form.value);
+
+    request.subscribe(() => {
       this.isModalOpen = false;
       this.form.reset();
       this.list.get();
