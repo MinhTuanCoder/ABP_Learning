@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  mongodb-databse:
+    image: mongo:7.0.5-jammy
+    ports:
+      - '27018:27017'
+    
